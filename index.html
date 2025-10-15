@@ -1,0 +1,56 @@
+<!doctype html>
+<html>
+<head><meta charset="utf-8"><title>Tron Deploy</title></head>
+<body>
+  <button id="connect">Connect TronLink</button>
+  <button id="deploy">Deploy Contract</button>
+  <pre id="out"></pre>
+
+  <script src="https://unpkg.com/tronweb@4.1.0/dist/TronWeb.js"></script>
+  <script>
+    const out = (s)=>{ document.getElementById('out').innerText += s + "\n"; console.log(s); };
+
+    document.getElementById('connect').onclick = async () => {
+      if (!window.tronWeb || !window.tronWeb.ready) return alert('Open in TronLink and unlock');
+      out('Connected: ' + window.tronWeb.defaultAddress.base58);
+    };
+
+    document.getElementById('deploy').onclick = async () => {
+      if (!window.tronWeb || !window.tronWeb.ready) return alert('Open in TronLink and unlock');
+      const tronWeb = window.tronWeb;
+      out('Using address: ' + tronWeb.defaultAddress.base58);
+
+      // ABI (paste the whole ABI JSON array here)
+      const ABI = /* PLACE YOUR ABI JSON HERE */;
+      // Bytecode (paste the hex string starting with 0x or without)
+      const BYTECODE = "YOUR_BYTECODE_HEX";
+
+      try {
+        out('Deploying contract (TronLink will prompt)...');
+
+        // TronWeb deploy using contract().new
+        const contractInstance = await tronWeb.contract().new({
+          abi: ABI,
+          bytecode: BYTECODE,
+          // constructor params: pass as 'parameters' array if your constructor has args
+          // example if constructor has (string name, string symbol, string baseURI, uint pricePerTrx, uint maxSupply)
+          // parameters: ["FootballAlienNFT","FBA","https://your-metadata/", 1, 1000],
+          parameters: [
+            "FootballAlienNFT",
+            "FBA",
+            "https://your-base-uri/",
+            1,  // pricePerTrx in TRX (integer)
+            1000 // maxSupply
+          ],
+          feeLimit: 1000000000  // increase if needed
+        });
+
+        // If successful, contractInstance.address has contract address
+        out('Deployed at: ' + contractInstance.address);
+      } catch (err) {
+        out('Deploy error: ' + (err.message || err));
+      }
+    };
+  </script>
+</body>
+</html>
